@@ -3,6 +3,7 @@ import string
 import torch
 
 from rnn import RNN
+# from utils import get_name_data, LetterTool
 
 
 def get_name_data():
@@ -54,10 +55,12 @@ def test():
     N = len(all_languages)
     hidden_size = 128
     lt = LetterTool()
-    X = lt.letter2tensor('A')
+    X = lt.line2tensor('Albert')
     rnn = RNN(lt.n_letters, hidden_size, N)
     hidden = torch.zeros(1, hidden_size)
-    output, next_hidden = rnn(X, hidden)
+    for i in range(X.size()[0]):
+        output, next_hidden = rnn(X[i], hidden)
+    print(X.shape)
     print(output.shape)
     print(next_hidden.shape)
 
