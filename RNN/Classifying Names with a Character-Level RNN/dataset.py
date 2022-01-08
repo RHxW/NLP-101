@@ -1,6 +1,3 @@
-import os
-import torch
-import random
 
 from utils import get_name_data, LetterTool, train_test_dataset_partition
 

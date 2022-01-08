@@ -2,11 +2,11 @@ import torch
 from torch.utils.data import DataLoader
 from torch.optim import SGD
 
-
 from dataset import NamesClassifyDataset
 from rnn import Network
 
-def train():
+
+def train(run_test, save_weight, save_path):
     dataset = NamesClassifyDataset()
 
     # sizes
@@ -44,5 +44,15 @@ def train():
             loss.backward()
             optimizer.step()
 
+    if save_weight:
+        torch.save(network.state_dict(), save_path)
+
+    if run_test:
+        network.eval()
+        testset = dataset.testset
+        for i in range(len(testset)):
+            test_sample
+
+
 if __name__ == "__main__":
-    train()
+    train(True, True, './weights.pth')
