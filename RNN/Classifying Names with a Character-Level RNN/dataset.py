@@ -18,7 +18,7 @@ class NamesClassifyDataset():
         self.testset_origin = dict()
 
         self.trainset = []  # [[name, language],...]
-        self.testset = []
+        self.testset = []  # [[name, language],...]
 
         for lang in langs:
             data_all = self.name_data_all[lang]
