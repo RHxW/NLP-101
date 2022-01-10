@@ -69,6 +69,7 @@ class NGramNetwork(nn.Module):
     def __init__(self, vocab_size, embedding_dim, context_size):
         super(NGramNetwork, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        # embedding里保存的就是vocabulary中每个词对应的特征向量
 
         self.L1 = nn.Linear(context_size * embedding_dim, 128)
         self.L2 = nn.Linear(128, vocab_size)
