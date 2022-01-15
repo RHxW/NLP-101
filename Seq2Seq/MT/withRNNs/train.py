@@ -62,10 +62,10 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
             for j in range(input_length):
                 x = input_tensor[j].to(device)
                 encoder_output, encoder_hidden = encoder(x, encoder_hidden)
-                encoder_outputs.append(encoder_output.squeeze())
+                encoder_outputs.append(encoder_output.squeeze().to(device))
 
             decoder_input = torch.tensor([[SOS_token]]).to(device)
-            decoder_hidden = encoder_hidden
+            decoder_hidden = encoder_hidden.to(device)
 
             use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
@@ -73,7 +73,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
                 # 用gt target作为decoder的输入
                 for j in range(target_length):
                     decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
-                    loss += criterion(decoder_output.squeeze(0), target_tensor[j])
+                    loss += criterion(decoder_output.squeeze(0).to(device), target_tensor[j])
                     decoder_input = target_tensor[j]
                     if decoder_input.item() == EOS_token:
                         break
@@ -81,7 +81,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
                 # 用预测结果作为decoder的输入
                 for j in range(target_length):
                     decoder_output, decoder_hidden = decoder(decoder_input, decoder_hidden)
-                    loss += criterion(decoder_output.squeeze(0), target_tensor[j])
+                    loss += criterion(decoder_output.squeeze(0).to(device), target_tensor[j])
                     topv, topi = decoder_output.topk(1)
                     decoder_input = topi
                     if decoder_input.item() == EOS_token:
@@ -102,7 +102,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
 
 if __name__ == '__main__':
     file_dir = '/Users/wangyunhang/Desktop/NLP-101/Seq2Seq/MT/data/'
-    epochs = 2
+    epochs = 1
     lang1 = 'eng'
     lang2 = 'fra'
     save_dir = './'
