@@ -40,7 +40,7 @@ class Seq2SeqTransformer(nn.Module):
                  src_vocab_size,
                  tgt_vocab_size,
                  dim_feedforward,
-                 dropout):
+                 dropout=0.1):
         super(Seq2SeqTransformer, self).__init__()
         self.transformer = nn.Transformer(
             d_model=emb_size,

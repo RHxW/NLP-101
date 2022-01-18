@@ -1,12 +1,13 @@
 import os.path
 import random
 import torch
+import datetime
 
 from model import EncoderRNN, DecoderRNN, AttnDecoderRNN
 from data import MTDataset
 
 
-def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=False, shuffle=True, teacher_forcing_ratio=0.5, log_interval=100):
+def train(file_dir, epochs, lang1, lang2, save_dir, device, resume=True, resume_file='',decoder_with_attn=False, shuffle=True, teacher_forcing_ratio=0.5, log_interval=100):
     """
 
     :param epochs:
@@ -15,6 +16,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
     :param lang2:
     :param save_dir:
     :param device:
+    :param resume:
     :param decoder_with_attn:
     :param shuffle: 随机采样
     :param teacher_forcing_ratio: 普通模式RNN会使用上一个state的输出作为下一个的输入，teacher_forcing模式会使用gt作为下一个的输入，可以避免训练时前面出现的错误影响后面的预测
@@ -40,6 +42,15 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
     else:
         decoder = DecoderRNN(hidden_size, output_size).to(device)
 
+    if resume:
+        if not os.path.exists(resume_file):
+            print('model resume fail')
+        else:
+            sd = torch.load(resume_file, map_location='cpu')
+            encoder.load_state_dict(sd['encoder'])
+            decoder.load_state_dict(sd['decoder'])
+
+
     lr = 1e-3
     encoder_optimizer = torch.optim.SGD(encoder.parameters(), lr=lr)
     decoder_optimizer = torch.optim.SGD(decoder.parameters(), lr=lr)
@@ -47,6 +58,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
     criterion = torch.nn.CrossEntropyLoss()
 
     assert 0 < log_interval < N
+    N = 60000
 
     for epoch in range(epochs):
         for i in range(N):
@@ -95,7 +107,7 @@ def train(file_dir, epochs, lang1, lang2, save_dir, device, decoder_with_attn=Fa
 
             # log
             if i % log_interval == 0:
-                print("epoch: %d, %d/%d, loss: %.4f" % (epoch, i, N, loss))
+                print("epoch: %d, %d/%d, loss: %.4f, %s" % (epoch, i, N, loss, datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")))
         save_path = save_dir + 'weights_simpleDecoder_%s-%s_ep_%d.pth' % (lang1, lang2, epoch)
         torch.save({'encoder': encoder.state_dict(), 'decoder': decoder.state_dict()}, save_path)
 
@@ -107,4 +119,6 @@ if __name__ == '__main__':
     lang2 = 'fra'
     save_dir = './'
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    train(file_dir, epochs, lang1, lang2, save_dir, device, shuffle=True, teacher_forcing_ratio=0.5)
+    resume = True
+    resume_file = ''
+    train(file_dir, epochs, lang1, lang2, save_dir, device, resume=resume, resume_file=resume_file, shuffle=True, teacher_forcing_ratio=0.5)
